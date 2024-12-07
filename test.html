@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Hello World!</title>
+
+    <link rel="stylesheet" type="text/css"
+          href="http://t4w.leela.tux4web.de/t4w_skin/t4w_bootstrap.scss" />
+    
+    <script type="importmap">
+    {
+       "imports": {"html": "./html.mjs"}
+    }
+    </script>
+    
+    <script type="module">
+      import { html } from "html";
+
+      document.addEventListener("DOMContentLoaded", event => {
+         const target = document.querySelector("#target"),
+               contents = html.div("Hello World!",
+                                   html.br(),
+                                   12, { class: ["text-danger"]});
+         console.log(contents);
+         contents.append_to(target);
+      });
+    </script>
+  </head>
+  <body>
+    <div id="target">
+    </div>
+  </body>
+</html>
