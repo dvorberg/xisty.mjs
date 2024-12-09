@@ -1,17 +1,37 @@
-class HTMLElement
+class Frag
 {
-	constructor(tag)
+	constructor()
 	{
-		this._ = document.createElement(tag.toUpperCase());
-		for (let a = 1; a < arguments.length; a++)
-		{
-			this.append(arguments[a]);
-		}
+		this.contents = [];
 	}
 
-	append(a)
+	append(/*...*/)
 	{
-		if (a instanceof HTMLElement)
+		for(const a in arguments)
+		{
+			this.contents.push(a);
+		}
+	}
+}
+
+class ElementWrapper
+{
+	constructor(element)
+	{
+		this._ = element
+	}
+
+	append(/*...*/)
+	{
+		for(const a of arguments)
+		{
+			this.append_one(a);
+		}
+	}	
+	
+	append_one(a)
+	{
+		if (a instanceof ElementWrapper)
 		{
 			// A Element instance (Browser’s DOM object)
 			this._.append(a._);
@@ -39,6 +59,17 @@ class HTMLElement
 				}
 			}
 		}
+		else if ( a instanceof Frag )
+		{
+			for ( const b of a.contents )
+			{
+				this.append(b);
+			}
+		}
+		else if ( a === null )
+		{
+			// pass
+		}
 		else
 		{
 			this._.append(a.toString());
@@ -51,7 +82,7 @@ class HTMLElement
 		{
 			parent.append(this._);
 		}
-		else if (parent instanceof HTMLElement)
+		else if (parent instanceof ElementWrapper)
 		{
 			parent._.append(this._);
 		}
@@ -77,10 +108,31 @@ class HTMLElement
 	}
 }
 
+class HTMLElement extends ElementWrapper
+{
+	constructor(tag)
+	{
+		super(document.createElement(tag.toUpperCase()));
+		
+		for (let a = 1; a < arguments.length; a++)
+		{
+			this.append(arguments[a]);
+		}		
+	}
+}
+
+class Wrapper extends ElementWrapper
+{
+	constructor(element)
+	{
+		super(element);
+	}
+}
+
 // From https://developer.mozilla.org/en-US/docs/Web/HTML/Element
 // I’ve removed tags marked as depricated (who’d want to use those??) and
 // experimantal.
-const alltags = "a abbr address area article aside audio b base bdi bdo blockquote body br button canvas caption cite code col colgroup data datalist dd del details dfn dialog div dl dt em embed fieldset figcaption figure footer form h1 head header hgroup hr html i iframe img input ins kbd label legend li link main map mark menu meta meter nav noscript object ol optgroup option output p picture pre progress q rp rt ruby s samp script search section select slot small source span strong style sub summary sup table tbody td template textarea tfoot th thead time title tr track u ul var video wbr".split(" ");
+const alltags = "a abbr address area article aside audio b base bdi bdo blockquote body br button canvas caption cite code col colgroup data datalist dd del details dfn dialog div dl dt em embed fieldset figcaption figure footer form h1 h2 h3 h4 h5 h6 head header hgroup hr html i iframe img input ins kbd label legend li link main map mark menu meta meter nav noscript object ol optgroup option output p picture pre progress q rp rt ruby s samp script search section select slot small source span strong style sub summary sup table tbody td template textarea tfoot th thead time title tr track u ul var video wbr".split(" ");
 
 function namespace() {
 	for (const tag of alltags)
@@ -89,6 +141,21 @@ function namespace() {
 		{
 			return new HTMLElement(tag, ...arguments)
 		};
+	}
+
+	this.Frag = function()
+	{
+		const frag = new Frag();
+		
+		for(const a in arguments)
+		{
+			frag.append(a);
+		}
+	}
+
+	this.Wrapper = function(e)
+	{
+		return new Wrapper(e);
 	}
 }
 
